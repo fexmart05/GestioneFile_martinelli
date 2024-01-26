@@ -1,11 +1,7 @@
 package gestionefile;
-
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.InputStreamReader;
 import java.io.IOException;
-import java.util.Scanner;
 /**
  *
  * @author federico
@@ -17,23 +13,34 @@ public class GestioneFile {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        
-        //1)LETTURA
+        // Lettura da user.json
         Lettore lettore = new Lettore("user.json");
-        lettore.start();
-        //2)ELABORAZIONE
-            Scanner scanner = new Scanner(System.in);
-        System.out.print("Inserisci username: ");
-        String username = scanner.nextLine();
-        System.out.print("Inserisci password: ");
-        String password = scanner.nextLine();
-        
-        //3) SCRITTURA
+        String userData = lettore.read();
+
+        // Richiesta all'utente di username e password
+        String username = leggiInput("Inserisci username: ");
+        String password = leggiInput("Inserisci password: ");
+
+
+        // Scrittura nel file output.csv
         Scrittore scrittore = new Scrittore("output.csv");
-        Thread threadScrittore = new Thread(scrittore);
-        threadScrittore.start();
-        
-        
+     
+
+      
     }
-    
+
+  
+
+    // Funzione per leggere l'input dalla console
+    private static String leggiInput(String prompt) {
+        System.out.print(prompt);
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
+            return br.readLine();
+        } catch (IOException ex) {
+            System.err.println("Errore durante la lettura dell'input.");
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
 }
