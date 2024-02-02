@@ -1,9 +1,6 @@
 package gestionefile;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
+import java.io.*;
 /**
- *
  * @author federico
  * @version 12/01/23
  */
@@ -13,34 +10,59 @@ public class GestioneFile {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // Lettura da user.json
+
+        //1)LETTURA
         Lettore lettore = new Lettore("user.json");
-        String userData = lettore.read();
-
-        // Richiesta all'utente di username e password
-        String username = leggiInput("Inserisci username: ");
-        String password = leggiInput("Inserisci password: ");
-
-
-        // Scrittura nel file output.csv
-        Scrittore scrittore = new Scrittore("output.csv");
-     
-
-      
-    }
-
-  
-
-    // Funzione per leggere l'input dalla console
-    private static String leggiInput(String prompt) {
-        System.out.print(prompt);
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
-            return br.readLine();
-        } catch (IOException ex) {
-            System.err.println("Errore durante la lettura dell'input.");
-            ex.printStackTrace();
-            return null;
+        lettore.start();
+        try {
+            lettore.join();
+        } catch (InterruptedException ex) {
+            System.err.println("Errore nel metodo join()");
+        } 
+       
+        //2)ELABORAZIONE
+        String username = null;
+        String password = null;
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        try {
+            System.out.println("Inserisci l'username");
+            username = br.readLine().toUpperCase();  // Legge una riga dall'input
+            System.out.println("Inserisci la password");
+             password = br.readLine().toUpperCase(); // Legge una riga dall'input
+        } catch (IOException e) {
+            System.err.println("Errore durante la lettura dell'input: " + e.getMessage());
         }
-    }
 
+
+        Cifrario cifrario=new Cifrario("falco");
+        String passwordCifrata = cifrario.cifra(password);
+
+
+
+
+
+
+        //3) SCRITTURA
+        Scrittore scrittore = new Scrittore("output.csv", username + ";" + passwordCifrata);
+        Thread threadScrittore = new Thread(scrittore);
+        threadScrittore.start();
+         try {
+            threadScrittore.join();
+        } catch (InterruptedException ex) {
+            System.err.println("Errore nel metodo join()");
+        } 
+        
+        //4) COPIA
+          Copia copiatore = new Copia("output.csv","copia.csv");
+        copiatore.start();
+        try {
+            copiatore.join();
+        } catch (InterruptedException ex) {
+            System.err.println("Errore nel metodo join()");
+        }
+        
+        
+        
+    }
+    
 }
